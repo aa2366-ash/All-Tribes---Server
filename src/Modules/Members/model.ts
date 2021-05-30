@@ -1,5 +1,5 @@
 import * as Mongoose from "mongoose";
-
+import { Tribe } from "../Tribes/model";
 enum MemberType {
   Admin = "Admin",
   Follower = "Follower",
@@ -41,9 +41,22 @@ const MemberSchema = new Mongoose.Schema(
 MemberSchema.virtual("id").get(function (this: MemberDocument) {
   return this._id.toHexString();
 });
+
 MemberSchema.set("toJSON", {
   virtuals: true,
 });
+
+MemberSchema.set("toObject", {
+  virtuals: true,
+});
+
+MemberSchema.virtual("tribe", {
+  ref: Tribe,
+  localField: "tribeId",
+  foreignField: "_id",
+  justOne: true,
+});
+
 export const Members = Mongoose.model<MemberDocument, MemberModel>(
   "Members",
   MemberSchema

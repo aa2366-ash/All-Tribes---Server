@@ -4,8 +4,8 @@ export interface Itribe {
   name: string;
   creatorId: string;
   description: string;
-  avatarUrl?: string;
-  tags: string[];
+  avatarUrl: string;
+  coverUrl: string;
 }
 
 export interface TribeDocument extends Itribe, Mongoose.Document {
@@ -17,7 +17,7 @@ export interface TribeModel extends Mongoose.Model<TribeDocument> {}
 
 const TribeSchema = new Mongoose.Schema<TribeDocument>(
   {
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
     creatorId: {
       type: Mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -25,7 +25,8 @@ const TribeSchema = new Mongoose.Schema<TribeDocument>(
     },
     description: { type: String, required: true },
     avatarUrl: { type: String },
-    tags: [{ type: String }],
+    coverUrl: { type: String },
+    members: { type: Number },
   },
   { timestamps: true }
 );
@@ -38,13 +39,9 @@ TribeSchema.set("toJSON", {
   virtuals: true,
 });
 
-TribeSchema.virtual("creator", {
-  ref: "Users",
-  localField: "_id",
-  foreignField: "creatorId",
-  justOne: true,
+TribeSchema.set("toObject", {
+  virtuals: true,
 });
-
 export const Tribe = Mongoose.model<TribeDocument, TribeModel>(
   "Tribe",
   TribeSchema

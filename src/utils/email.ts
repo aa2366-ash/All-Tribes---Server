@@ -1,13 +1,14 @@
 import sgMail, { MailDataRequired } from "@sendgrid/mail";
 import { emailtemplate } from "./emailtemplate";
 
-const Email = async (
-  name: string,
-  email: string,
-  message: string,
-  buttontext: string,
-  link: string
-) => {
+interface EmailArgs {
+  name: string;
+  email: string;
+  message: string;
+  buttontext: string;
+  link: string;
+}
+const Email = async ({ name, email, message, buttontext, link }: EmailArgs) => {
   try {
     if (process.env.EMAIL_API_KEY && process.env.SENDGRID_EMAIL) {
       sgMail.setApiKey(process.env.EMAIL_API_KEY);

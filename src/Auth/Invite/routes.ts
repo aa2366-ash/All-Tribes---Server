@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { inviteHandler } from "./controller";
+import { CreateInvite, CreateUser } from "./controller";
 
 const router = Router();
 
-router.post("/", inviteHandler);
-
+router.post("/", CreateInvite);
+router.post("/create", CreateUser);
 export default router;

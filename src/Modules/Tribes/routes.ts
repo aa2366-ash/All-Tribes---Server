@@ -1,17 +1,10 @@
 import { Router } from "express";
-import {
-  CreateHandler,
-  GetTribeHandler,
-  DeleteHandler,
-  UpdateHandler,
-} from "./controller";
+import { Create, Get } from "./controller";
 import { Authenticatetoken } from "../../Middleware/validate";
 
 const TribeRoutes = Router();
 
-TribeRoutes.post("/", Authenticatetoken, CreateHandler);
-TribeRoutes.get("/", Authenticatetoken, GetTribeHandler);
-TribeRoutes.patch("/", Authenticatetoken, UpdateHandler);
-TribeRoutes.delete("/", Authenticatetoken, DeleteHandler);
+TribeRoutes.post("/", Create);
+TribeRoutes.get("/", Get);
 
 export default TribeRoutes;

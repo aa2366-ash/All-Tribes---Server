@@ -53,6 +53,10 @@ userSchema.set("toJSON", {
   virtuals: true,
 });
 
+userSchema.set("toObject", {
+  virtuals: true,
+});
+
 userSchema.statics = {
   async createUser(user: Iuser): Promise<Mongoose.LeanDocument<UserDocument>> {
     const userDoc = await (this as UserModel).create({ ...user });
@@ -68,7 +72,4 @@ userSchema.statics = {
   },
 };
 
-export const Users = Mongoose.model<UserDocument, UserModel>(
-  "Users",
-  userSchema
-);
+export const User = Mongoose.model<UserDocument, UserModel>("User", userSchema);
