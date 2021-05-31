@@ -10,7 +10,7 @@ export const GetAccessToken = (email: string, id: string) => {
   const accesstoken = jwt.sign(
     user,
     process.env.ACCESS_TOKEN_SECRET as string,
-    { expiresIn: "10800s" }
+    { expiresIn: "15000s" }
   );
   return accesstoken;
 };
@@ -33,9 +33,7 @@ export const Authenticatetoken = (
   if (!token) return res.status(401).json({ message: "Token is null" });
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, user) => {
     if (err)
-      return res
-        .status(401)
-        .json({ message: "Access denied. kindly login again" });
+      return res.status(403).json({ message: "Failed jwt Authentication" });
     else {
       req.user = user as ReqUser;
       next();

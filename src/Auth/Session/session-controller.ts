@@ -13,39 +13,51 @@ interface IToken {
 
 export const Token: RequestHandler = async (req, res) => {
   try {
+    await body("refreshtoken").isString().run(req);
     const result = validationResult(req);
+
     if (!result.isEmpty())
-      return res.status(401).json({ message: ". Invalid user" });
+      return res.status(401).json({ message: "Refresh token is null" });
 
     const { refreshtoken } = req.body;
 
     if (!refreshtoken)
-      return res.status(401).json({ message: "No refreshToken in body" });
+      return res.status(401).json({ message: "Refresh token is null" });
 
     const userdoc = await Sessions.getSession(refreshtoken);
     console.log(userdoc);
     if (!userdoc) {
-      res.status(401).json({ message: "Session Expired. User Logged out" });
+      res
+        .status(401)
+        .json({ message: "Refresh token expired. User Logged out" });
       return;
     }
+
     jwt.verify(
       refreshtoken as string,
       process.env.REFRESH_TOKEN_SECRET as string,
       (err, user) => {
         if (err) {
-          res.status(401).json({ message: "Session Expired. User Logged out" });
+          res
+            .status(401)
+            .json({ message: "Refresh token verification failed" });
           return;
         }
         const u = user as IToken;
-        if (u.email && u.id) {
-          const accessToken = GetAccessToken(u.email, u.id);
-          res.status(200).json({ accessToken, currentUser: userdoc.user });
-        } else
-          res.status(401).json({ message: "Session Expired. User Logged out" });
+        if (!u.email && !u.id) {
+          return res
+            .status(401)
+            .json({ message: "User with refresh token is null" });
+        } else {
+          const accesstoken = GetAccessToken(u.email, u.id);
+          return res
+            .status(200)
+            .json({ accesstoken, currentUser: userdoc.user });
+        }
       }
     );
   } catch (err) {
-    res.status(401).json({ message: "Session Expired. User Logged out" });
+    res.status(401).json({ message: "Fetch Acess token failed" });
   }
 };
 
@@ -61,7 +73,6 @@ export const Login: RequestHandler = async (req, res, next) => {
     if (!user)
       return res.status(401).json({ message: "Email Address does not exists" });
     const { hashpassword, _id, ...restUser } = user;
-
     const isValid = await bcrypt.compare(password, hashpassword);
     if (!isValid)
       return res.status(401).json({ message: "Password is incorrect" });

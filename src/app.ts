@@ -6,6 +6,13 @@ dotenv.config({ path: ".env" });
 import cors from "cors";
 import { Authenticatetoken } from "./Middleware/validate";
 import cookieParser from "cookie-parser";
+import InviteRoutes from "./Auth/Invite/routes";
+import UserRoutes from "./Auth/User/user-routes";
+import TribeRoutes from "./Modules/Tribes/routes";
+import MemberRoutes from "./Modules/Members/routes";
+import SessionRoutes from "./Auth/Session/session-routes";
+import PostRoutes from "./Modules/Posts/post-routes";
+import ActivityRoutes from "./Modules/Activities/activity-routes";
 
 //----------------------------Config----------------------------------
 const app = express();
@@ -19,17 +26,13 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 // -----------------------------Routes--------------------------------
 
-import InviteRoutes from "./Auth/Invite/routes";
-import UserRoutes from "./Auth/User/user-routes";
-import TribeRoutes from "./Modules/Tribes/routes";
-import MemberRoutes from "./Modules/Members/routes";
-import SessionRoutes from "./Auth/Session/session-routes";
-
 app.use("/api/invite", InviteRoutes);
 app.use("/api/user", UserRoutes);
 app.use("/api/session", SessionRoutes);
 app.use("/api/tribes", Authenticatetoken, TribeRoutes);
 app.use("/api/member", Authenticatetoken, MemberRoutes);
+app.use("/api/post", Authenticatetoken, PostRoutes);
+app.use("/api/activity/", Authenticatetoken, ActivityRoutes);
 
 //-----------------------------Mongoose--------------------------------
 import mongoose from "mongoose";
