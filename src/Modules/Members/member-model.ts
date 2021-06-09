@@ -1,5 +1,5 @@
 import * as Mongoose from "mongoose";
-import { Tribe } from "../Tribes/model";
+import { Tribe } from "../Tribes/tribe-model";
 enum MemberType {
   Admin = "Admin",
   Follower = "Follower",
@@ -21,12 +21,10 @@ const MemberSchema = new Mongoose.Schema(
   {
     tribeId: {
       type: Mongoose.Schema.Types.ObjectId,
-      ref: "Tribe",
       required: true,
     },
     userId: {
       type: Mongoose.Schema.Types.ObjectId,
-      ref: "Users",
       required: true,
     },
     type: {
@@ -51,13 +49,14 @@ MemberSchema.set("toObject", {
 });
 
 MemberSchema.virtual("tribe", {
-  ref: Tribe,
+  ref: "Tribe",
   localField: "tribeId",
   foreignField: "_id",
   justOne: true,
+  model: Tribe,
 });
 
-export const Members = Mongoose.model<MemberDocument, MemberModel>(
-  "Members",
+export const Member = Mongoose.model<MemberDocument, MemberModel>(
+  "Member",
   MemberSchema
 );

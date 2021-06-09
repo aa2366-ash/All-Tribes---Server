@@ -21,7 +21,7 @@ const Email = async ({ name, email, message, buttontext, link }: EmailArgs) => {
         html: htmltemplate,
       };
       await sgMail.send(msg);
-    } else console.log("email error");
+    }
   } catch (err) {
     console.log(err);
   }

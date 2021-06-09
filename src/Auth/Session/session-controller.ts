@@ -25,7 +25,6 @@ export const Token: RequestHandler = async (req, res) => {
       return res.status(401).json({ message: "Refresh token is null" });
 
     const userdoc = await Sessions.getSession(refreshtoken);
-    console.log(userdoc);
     if (!userdoc) {
       res
         .status(401)
@@ -87,7 +86,6 @@ export const Login: RequestHandler = async (req, res, next) => {
     });
   } catch (err) {
     res.status(500).json({ message: err.message, err });
-    console.log(err);
   }
 };
 

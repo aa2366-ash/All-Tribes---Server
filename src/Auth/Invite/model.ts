@@ -43,7 +43,6 @@ inviteSchema.statics = {
 
   async deleteinvite(code: string) {
     const inviteDoc = await (this as InviteModel).findOneAndDelete({ code });
-    console.log(inviteDoc);
   },
 };
 

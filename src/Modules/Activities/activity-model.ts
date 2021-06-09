@@ -1,7 +1,7 @@
 import * as Mongoose from "mongoose";
 import { User } from "../../Auth/User/user-model";
 import { Post } from "../Posts/post-model";
-import { Tribe } from "../Tribes/model";
+import { Tribe } from "../Tribes/tribe-model";
 
 interface IActivity {
   tribeId: string;
@@ -63,7 +63,9 @@ ActivitySchema.virtual("tribe", {
 });
 
 interface IDeleted {
-  deletedCount: number;
+  deletedCount?: number;
+  ok?: number;
+  number?: number;
 }
 interface IActivityModel extends Mongoose.Model<IActivityDocument> {
   createActivity(activity: IActivity): Promise<IActivityDocument>;
@@ -76,16 +78,30 @@ ActivitySchema.statics = {
     activity: IActivity
   ): Promise<Mongoose.LeanDocument<IActivityDocument>> {
     const activitydoc = await (await (this as IActivityModel).create(activity))
-      .populate("user", "-hashpassword")
+      .populate("creator", "-hashpassword")
       .populate("tribe")
       .populate("post")
       .execPopulate();
     return activitydoc.toObject();
   },
+
+  async getActivityList(
+    activity: IActivity
+  ): Promise<Mongoose.LeanDocument<IActivityDocument[]>> {
+    const activitydoc = await (this as IActivityModel)
+      .find(activity)
+      .populate("creator", "-hashpassword")
+      .populate("tribe")
+      .populate("post")
+      .exec();
+    return activitydoc;
+  },
   async deleteActivity(activity: IActivity) {
     try {
-      const activitydoc = await (this as IActivityModel).deleteOne(activity);
-      return activitydoc.deletedCount;
+      const activitydoc: IDeleted = await (this as IActivityModel).deleteOne(
+        activity
+      );
+      return activitydoc;
     } catch (err) {
       return err;
     }

@@ -8,8 +8,8 @@ import { Authenticatetoken } from "./Middleware/validate";
 import cookieParser from "cookie-parser";
 import InviteRoutes from "./Auth/Invite/routes";
 import UserRoutes from "./Auth/User/user-routes";
-import TribeRoutes from "./Modules/Tribes/routes";
-import MemberRoutes from "./Modules/Members/routes";
+import TribeRoutes from "./Modules/Tribes/tribe-routes";
+import MemberRoutes from "./Modules/Members/member-routes";
 import SessionRoutes from "./Auth/Session/session-routes";
 import PostRoutes from "./Modules/Posts/post-routes";
 import ActivityRoutes from "./Modules/Activities/activity-routes";
@@ -18,7 +18,6 @@ import ActivityRoutes from "./Modules/Activities/activity-routes";
 const app = express();
 app.use(json());
 app.use(cookieParser());
-console.log(process.env.APP_URL);
 app.use(cors({ origin: process.env.APP_URL, credentials: true }));
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).json({ message: err.message });
@@ -30,12 +29,17 @@ app.use("/api/invite", InviteRoutes);
 app.use("/api/user", UserRoutes);
 app.use("/api/session", SessionRoutes);
 app.use("/api/tribes", Authenticatetoken, TribeRoutes);
-app.use("/api/member", Authenticatetoken, MemberRoutes);
-app.use("/api/post", Authenticatetoken, PostRoutes);
-app.use("/api/activity/", Authenticatetoken, ActivityRoutes);
+app.use("/api/tribes/:tribeId/follow", Authenticatetoken, MemberRoutes);
+app.use("/api/tribes/:tribeId/posts", Authenticatetoken, PostRoutes);
+app.use(
+  "/api/tribes/:tribeId/posts/:postId/activity",
+  Authenticatetoken,
+  ActivityRoutes
+);
 
 //-----------------------------Mongoose--------------------------------
 import mongoose from "mongoose";
+mongoose.set("debug", true);
 
 if (process.env.DB_URL)
   mongoose

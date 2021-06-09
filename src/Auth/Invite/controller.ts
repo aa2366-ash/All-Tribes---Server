@@ -1,13 +1,10 @@
 import { RequestHandler } from "express";
-import { MongoError } from "mongodb";
 import { Invite } from "./model";
 import { v4 as uuidv4 } from "uuid";
 import { body, validationResult } from "express-validator";
 import Email from "../../utils/email";
 import { User } from "../User/user-model";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { ReqUser } from "../../Middleware/validate";
 
 export const CreateInvite: RequestHandler = async (req, res, next) => {
   await body("email").isEmail().run(req);
