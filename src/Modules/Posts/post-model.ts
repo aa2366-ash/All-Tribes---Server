@@ -1,6 +1,7 @@
 import * as Mongoose from "mongoose";
 import { User } from "../../Auth/User/user-model";
 import { Activity } from "../Activities/activity-model";
+import { Tribe } from "../Tribes/tribe-model";
 interface IPost {
   text: string;
   gifUrl: string;
@@ -64,17 +65,25 @@ PostSchema.set("toObject", {
 });
 
 PostSchema.virtual("creator", {
-  ref: User,
+  ref: "User",
   localField: "creatorId",
   foreignField: "_id",
   justOne: true,
+  model: User,
 });
-
+PostSchema.virtual("tribe", {
+  ref: "Tribe",
+  localField: "tribeId",
+  foreignField: "_id",
+  justOne: true,
+  model: Tribe,
+});
 PostSchema.virtual("isLiked", {
-  ref: Activity,
+  ref: "Activity",
   localField: "_id",
   foreignField: "postId",
   justOne: true,
+  model: Activity,
 });
 
 PostSchema.statics = {
@@ -91,12 +100,19 @@ PostSchema.statics = {
     limit: number
   ): Promise<Mongoose.LeanDocument<IPostDocument[]>> {
     const postdoc = await (this as IPostModel)
-      .find({ tribeId })
+      .find({ ...(tribeId !== "MyPost" ? { tribeId } : { creatorId: userId }) })
       .sort({ updatedAt: -1 })
       .skip(skipCount)
       .limit(limit)
       .populate("creator", "-hashpassword")
-      .populate({ path: "isLiked", match: { creatorId: userId, tribeId } })
+      .populate({
+        path: "isLiked",
+        match: {
+          creatorId: userId,
+          ...(tribeId === "MyPost" ? {} : { tribeId }),
+        },
+      })
+      .populate({ path: "tribe" })
       .exec();
     return postdoc;
   },

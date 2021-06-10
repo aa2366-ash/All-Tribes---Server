@@ -21,7 +21,8 @@ export interface TribeModel extends Mongoose.Model<ITribeDocument> {
     tribeId: string
   ): Promise<Mongoose.LeanDocument<ITribeDocument>>;
   tribeSuggestion(
-    userId: string
+    userId: string,
+    search: string
   ): Promise<Mongoose.LeanDocument<ITribeDocument[]>>;
 }
 
@@ -56,7 +57,7 @@ TribeSchema.virtual("isMember", {
   ref: "Member",
   localField: "_id",
   foreignField: "tribeId",
-  justOne: false,
+  justOne: true,
   model: Member,
 });
 
@@ -80,12 +81,16 @@ TribeSchema.statics = {
     return decrement.toObject();
   },
   async tribeSuggestion(
-    userId: string
+    userId: string,
+    search: string
   ): Promise<Mongoose.LeanDocument<ITribeDocument[]>> {
-    const result = await Tribe.find({})
+    const rgx = new RegExp(search);
+    const result = await Tribe.find({
+      $or: [{ name: { $regex: rgx } }, { description: { $regex: rgx } }],
+    })
       .populate({
         path: "isMember",
-        userId: { $ne: userId },
+        match: { userId },
       })
       .exec();
     return result;

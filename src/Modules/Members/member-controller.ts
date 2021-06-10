@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { Members } from "./member-model";
+import { Member } from "./member-model";
 import { body, validationResult, query, param } from "express-validator";
 import { ReqUser } from "../../Middleware/validate";
 import { Tribe } from "../Tribes/tribe-model";
@@ -16,7 +16,7 @@ export const CreateFollower: RequestHandler = async (req, res) => {
 
     const tribeId = req.params.tribeId;
     const user = req.user as ReqUser;
-    const memberdoc = await Members.create({
+    const memberdoc = await Member.create({
       tribeId,
       userId: user.id,
       type: "Follower",

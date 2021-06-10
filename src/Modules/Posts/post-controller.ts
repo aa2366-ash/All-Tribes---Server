@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { body, validationResult, query, param } from "express-validator";
 import { ReqUser } from "../../Middleware/validate";
-import { Members } from "../Members/member-model";
+import { Member } from "../Members/member-model";
 import { Post } from "./post-model";
 
 export const Create: RequestHandler = async (req, res) => {
@@ -24,8 +24,8 @@ export const Create: RequestHandler = async (req, res) => {
     const { id, email } = req.user as ReqUser;
     const { text, gifUrl } = req.body;
     const tribeId = req.params.tribeId as string;
-    const isMember = Members.findOne({ tribeId, userId: id });
-    if (!isMember) {
+    const isMember = await Member.findOne({ tribeId, userId: id });
+    if (isMember == null) {
       // FIXME: statuscode
       return res.status(400).json({ message: "Join tribe to post" });
     }
@@ -45,7 +45,7 @@ export const Create: RequestHandler = async (req, res) => {
 };
 
 export const Get: RequestHandler = async (req, res) => {
-  await param("tribeId").isMongoId().run(req);
+  await param("tribeId").isString().run(req);
   await query("pageParam").isString().toInt().run(req);
   await query("limit").isInt().toInt().run(req);
   const result = validationResult(req);
@@ -60,10 +60,14 @@ export const Get: RequestHandler = async (req, res) => {
     const pageParam = parseInt((req.query.pageParam as string) ?? "0");
     const limit = parseInt((req.query.limit as string) ?? "10");
     const skipCount = pageParam * limit;
-    const isMember = Members.findOne({ tribeId, userId: id });
-    if (!isMember) {
-      // FIXME: statuscode
-      return res.status(400).json({ message: "Join tribe to view all posts" });
+    if (tribeId !== "MyPost") {
+      const isMember = await Member.findOne({ tribeId, userId: id });
+      if (!isMember) {
+        // FIXME: statuscode
+        return res
+          .status(401)
+          .json({ message: "Join tribe to view all posts" });
+      }
     }
     const post = await Post.getPostList(tribeId, id, skipCount, limit);
     return res.status(200).json(post);

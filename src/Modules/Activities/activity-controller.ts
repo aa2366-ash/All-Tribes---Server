@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { body, validationResult, query, param } from "express-validator";
 import { ReqUser } from "../../Middleware/validate";
-import { Members } from "../Members/member-model";
+import { Member } from "../Members/member-model";
 import { Post } from "../Posts/post-model";
 import { Activity } from "./activity-model";
 
@@ -20,7 +20,7 @@ export const createactivity: RequestHandler = async (req, res) => {
     const { id, email } = req.user as ReqUser;
     const tribeId = req.params.tribeId as string;
     const postId = req.params.postId as string;
-    const isMember = Members.findOne({ tribeId, userId: id });
+    const isMember = await Member.findOne({ tribeId, userId: id });
     if (!isMember) {
       // FIXME: statuscode
       return res.status(400).json({ message: "Join tribe to post" });
@@ -36,6 +36,7 @@ export const createactivity: RequestHandler = async (req, res) => {
     return res.status(500).json({ message: err.message, err });
   }
 };
+
 export const getActivityList: RequestHandler = async (req, res) => {
   await param("tribeId").isString().run(req);
   await param("postId").isString.arguments(req);
@@ -51,7 +52,7 @@ export const getActivityList: RequestHandler = async (req, res) => {
     const { id, email } = req.user as ReqUser;
     const tribeId = req.params.tribeId as string;
     const postId = req.params.postId as string;
-    const isMember = Members.findOne({ tribeId, userId: id });
+    const isMember = await Member.findOne({ tribeId, userId: id });
     if (!isMember) {
       // FIXME: statuscode
       return res.status(400).json({ message: "Join tribe to post" });
@@ -83,7 +84,7 @@ export const deleteactivity: RequestHandler = async (req, res) => {
     const { id, email } = req.user as ReqUser;
     const tribeId = req.params.tribeId as string;
     const postId = req.params.postId as string;
-    const isMember = Members.findOne({ tribeId, userId: id });
+    const isMember = await Member.findOne({ tribeId, userId: id });
     if (!isMember) {
       // FIXME: statuscode
       return res.status(400).json({ message: "Join tribe to post" });
