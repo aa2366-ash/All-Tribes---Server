@@ -1,1 +1,1 @@
-server: yarn start
+server: node dist/index.js
