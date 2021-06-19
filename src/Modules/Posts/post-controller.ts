@@ -5,7 +5,7 @@ import { Member } from "../Members/member-model";
 import { Post } from "./post-model";
 
 export const Create: RequestHandler = async (req, res) => {
-  await body("text").isString().run(req);
+  await body("text").optional({ checkFalsy: true }).isString().run(req);
   await body("gifUrl")
     .optional({ checkFalsy: true })
     .isString()
@@ -71,6 +71,56 @@ export const Get: RequestHandler = async (req, res) => {
     }
     const post = await Post.getPostList(tribeId, id, skipCount, limit);
     return res.status(200).json(post);
+  } catch (err) {
+    return res.status(500).json({ message: err.message, err });
+  }
+};
+
+export const Delete: RequestHandler = async (req, res) => {
+  try {
+    await param("postId").isMongoId().run(req);
+    const result = validationResult(req);
+    if (!result.isEmpty())
+      return res.status(400).json({
+        err: result.array(),
+        message: "Invalid Request. Failed at express validator",
+      });
+    const { id, email } = req.user as ReqUser;
+    const postId = req.params.postId as string;
+    const isDeleted = await Post.deleteOne({ creatorId: id, _id: postId });
+    if (isDeleted.deletedCount) {
+      return res.status(200).json("Post deleted");
+    } else return res.status(400).json({ message: "Post not deleted" });
+  } catch (err) {
+    return res.status(500).json({ message: err.message, err });
+  }
+};
+
+export const Edit: RequestHandler = async (req, res) => {
+  try {
+    await param("postId").isMongoId().run(req);
+    await body("text").optional({ checkFalsy: true }).isString().run(req);
+    await body("gifUrl")
+      .optional({ checkFalsy: true })
+      .isString()
+      .isURL()
+      .run(req);
+    const result = validationResult(req);
+    if (!result.isEmpty())
+      return res.status(400).json({
+        err: result.array(),
+        message: "Invalid Request. Failed at express validator",
+      });
+    const { id } = req.user as ReqUser;
+    const postId = req.params.postId;
+    console.log(id, postId);
+    const { text, gifUrl } = req.body;
+    const postdoc = await Post.findOneAndUpdate(
+      { _id: postId, creatorId: id },
+      { text, gifUrl },
+      { new: true }
+    );
+    return res.status(200).json({ postdoc });
   } catch (err) {
     return res.status(500).json({ message: err.message, err });
   }

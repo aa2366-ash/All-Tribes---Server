@@ -1,10 +1,8 @@
 import * as Mongoose from "mongoose";
 import { User } from "../../Auth/User/user-model";
 import { Post } from "../Posts/post-model";
-import { Tribe } from "../Tribes/tribe-model";
 
 interface IActivity {
-  tribeId: string;
   creatorId: string;
   postId: string;
 }
@@ -15,10 +13,6 @@ interface IActivityDocument extends IActivity, Mongoose.Document {
 }
 const ActivitySchema = new Mongoose.Schema(
   {
-    tribeId: {
-      type: Mongoose.Schema.Types.ObjectId,
-      required: true,
-    },
     creatorId: {
       type: Mongoose.Schema.Types.ObjectId,
       required: true,
@@ -44,20 +38,15 @@ ActivitySchema.set("toObject", {
 });
 
 ActivitySchema.virtual("creator", {
-  ref: User,
+  ref: "User",
   localField: "creatorId",
   foreignField: "_id",
   justOne: true,
+  model: User,
 });
 ActivitySchema.virtual("post", {
   ref: Post,
   localField: "postId",
-  foreignField: "_id",
-  justOne: true,
-});
-ActivitySchema.virtual("tribe", {
-  ref: Tribe,
-  localField: "creatorId",
   foreignField: "_id",
   justOne: true,
 });
@@ -79,8 +68,6 @@ ActivitySchema.statics = {
   ): Promise<Mongoose.LeanDocument<IActivityDocument>> {
     const activitydoc = await (await (this as IActivityModel).create(activity))
       .populate("creator", "-hashpassword")
-      .populate("tribe")
-      .populate("post")
       .execPopulate();
     return activitydoc.toObject();
   },
@@ -91,20 +78,15 @@ ActivitySchema.statics = {
     const activitydoc = await (this as IActivityModel)
       .find(activity)
       .populate("creator", "-hashpassword")
-      .populate("tribe")
-      .populate("post")
       .exec();
     return activitydoc;
   },
   async deleteActivity(activity: IActivity) {
-    try {
-      const activitydoc: IDeleted = await (this as IActivityModel).deleteOne(
-        activity
-      );
-      return activitydoc;
-    } catch (err) {
-      return err;
-    }
+    const activitydoc: IDeleted = await (this as IActivityModel).deleteOne(
+      activity
+    );
+
+    return activitydoc;
   },
 };
 

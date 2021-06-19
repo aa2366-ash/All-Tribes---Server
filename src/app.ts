@@ -31,11 +31,7 @@ app.use("/api/session", SessionRoutes);
 app.use("/api/tribes", Authenticatetoken, TribeRoutes);
 app.use("/api/tribes/:tribeId/follow", Authenticatetoken, MemberRoutes);
 app.use("/api/tribes/:tribeId/posts", Authenticatetoken, PostRoutes);
-app.use(
-  "/api/tribes/:tribeId/posts/:postId/activity",
-  Authenticatetoken,
-  ActivityRoutes
-);
+app.use("/api/activity/:postId", Authenticatetoken, ActivityRoutes);
 
 //-----------------------------Mongoose--------------------------------
 import mongoose from "mongoose";

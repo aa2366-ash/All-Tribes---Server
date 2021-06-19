@@ -6,9 +6,7 @@ import { Post } from "../Posts/post-model";
 import { Activity } from "./activity-model";
 
 export const createactivity: RequestHandler = async (req, res) => {
-  await param("tribeId").isString().run(req);
-  await param("postId").isString.arguments(req);
-
+  await param("postId").isMongoId().run(req);
   const result = validationResult(req);
   if (!result.isEmpty())
     return res.status(400).json({
@@ -17,28 +15,24 @@ export const createactivity: RequestHandler = async (req, res) => {
     });
 
   try {
-    const { id, email } = req.user as ReqUser;
-    const tribeId = req.params.tribeId as string;
+    const { id } = req.user as ReqUser;
     const postId = req.params.postId as string;
-    const isMember = await Member.findOne({ tribeId, userId: id });
-    if (!isMember) {
-      // FIXME: statuscode
-      return res.status(400).json({ message: "Join tribe to post" });
-    }
     const like = await Activity.createActivity({
       postId,
-      tribeId,
       creatorId: id,
     });
-    const incLike = await (await Post.incLike(postId)).toObject();
-    return res.status(200).json({ message: "Liked the post", data: like });
+    if (like) {
+      const incLike = await Post.incLike(postId);
+      return res.status(200).json({ message: "Liked the post", data: incLike });
+    } else {
+      return res.status(400).json({ message: "Post not liked" });
+    }
   } catch (err) {
     return res.status(500).json({ message: err.message, err });
   }
 };
 
 export const getActivityList: RequestHandler = async (req, res) => {
-  await param("tribeId").isString().run(req);
   await param("postId").isString.arguments(req);
 
   const result = validationResult(req);
@@ -59,20 +53,16 @@ export const getActivityList: RequestHandler = async (req, res) => {
     }
     const postList = await Activity.getActivityList({
       postId,
-      tribeId,
       creatorId: id,
     });
-    return res
-      .status(200)
-      .json({ message: "Loaded the tribe post", data: postList });
+    return res.status(200).json({ postList });
   } catch (err) {
     return res.status(500).json({ message: err.message, err });
   }
 };
-export const deleteactivity: RequestHandler = async (req, res) => {
-  await param("tribeId").isString().run(req);
-  await param("postId").isString.arguments(req);
 
+export const deleteactivity: RequestHandler = async (req, res) => {
+  await param("postId").isMongoId().run(req);
   const result = validationResult(req);
   if (!result.isEmpty())
     return res.status(400).json({
@@ -81,25 +71,15 @@ export const deleteactivity: RequestHandler = async (req, res) => {
     });
 
   try {
-    const { id, email } = req.user as ReqUser;
-    const tribeId = req.params.tribeId as string;
+    const { id } = req.user as ReqUser;
     const postId = req.params.postId as string;
-    const isMember = await Member.findOne({ tribeId, userId: id });
-    if (!isMember) {
-      // FIXME: statuscode
-      return res.status(400).json({ message: "Join tribe to post" });
-    }
     const isDeleted = await Activity.deleteActivity({
       postId,
-      tribeId,
       creatorId: id,
     });
-    if (isDeleted.deletedCount == 0) {
-      return res.status(400).json({ message: "Post doesnot exists" });
-    } else {
-      const decLike = await (await Post.decLike(postId)).toObject();
-      return res.status(200).json({ message: "Liked the post", data: decLike });
-    }
+    console.log(isDeleted);
+    const decLike = await Post.decLike(postId);
+    return res.status(200).json({ message: "Uniked the post", data: decLike });
   } catch (err) {
     return res.status(500).json({ message: err.message, err });
   }

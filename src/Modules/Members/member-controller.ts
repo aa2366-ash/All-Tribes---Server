@@ -15,10 +15,10 @@ export const CreateFollower: RequestHandler = async (req, res) => {
       });
 
     const tribeId = req.params.tribeId;
-    const user = req.user as ReqUser;
+    const { id } = req.user as ReqUser;
     const memberdoc = await Member.create({
       tribeId,
-      userId: user.id,
+      userId: id,
       type: "Follower",
     });
     const member = memberdoc.toObject();

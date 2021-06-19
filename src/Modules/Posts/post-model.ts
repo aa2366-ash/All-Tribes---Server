@@ -109,24 +109,27 @@ PostSchema.statics = {
         path: "isLiked",
         match: {
           creatorId: userId,
-          ...(tribeId === "MyPost" ? {} : { tribeId }),
         },
       })
       .populate({ path: "tribe" })
       .exec();
     return postdoc;
   },
+
   async incLike(postId: string): Promise<Mongoose.LeanDocument<IPostDocument>> {
     const increment = (await Post.findOneAndUpdate(
       { _id: postId },
-      { $inc: { members: 1 } }
+      { $inc: { like: 1 } },
+      { new: true }
     )) as IPostDocument;
     return increment;
   },
+
   async decLike(postId: string): Promise<Mongoose.LeanDocument<IPostDocument>> {
     const decrement = (await Post.findOneAndUpdate(
       { _id: postId },
-      { $inc: { members: -1 } }
+      { $inc: { like: -1 } },
+      { new: true }
     )) as IPostDocument;
     return decrement.toObject();
   },
