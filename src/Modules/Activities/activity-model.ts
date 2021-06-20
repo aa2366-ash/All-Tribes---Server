@@ -29,14 +29,6 @@ ActivitySchema.virtual("id").get(function (this: IActivityDocument) {
   return this._id.toHexString();
 });
 
-ActivitySchema.set("toJSON", {
-  virtuals: true,
-});
-
-ActivitySchema.set("toObject", {
-  virtuals: true,
-});
-
 ActivitySchema.virtual("creator", {
   ref: "User",
   localField: "creatorId",
@@ -45,10 +37,18 @@ ActivitySchema.virtual("creator", {
   model: User,
 });
 ActivitySchema.virtual("post", {
-  ref: Post,
+  ref: "Post",
   localField: "postId",
   foreignField: "_id",
   justOne: true,
+  model: Post,
+});
+ActivitySchema.set("toJSON", {
+  virtuals: true,
+});
+
+ActivitySchema.set("toObject", {
+  virtuals: true,
 });
 
 interface IDeleted {
