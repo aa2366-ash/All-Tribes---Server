@@ -1,1 +1,1 @@
-server: node dist/index.js
+server: node dist/app.js
