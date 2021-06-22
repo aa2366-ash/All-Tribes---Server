@@ -45,7 +45,7 @@ if (process.env.DB_URL)
       useCreateIndex: true,
     })
     .then((data) => {
-      console.log("MongoDB connected ");
+      console.log("MongoDB connected successfully");
       app.listen(process.env.PORT);
     })
     .catch((err) => {
